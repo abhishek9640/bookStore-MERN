@@ -41,7 +41,7 @@ app.post('/books', async (request, response) => {
 })
 
 //Route for Get All Books from database
-app.get('/books', async (request, response) =>{
+app.get('/books', async (request, response) => {
     try {
         const books = await Book.find({});
 
@@ -50,13 +50,13 @@ app.get('/books', async (request, response) =>{
             data: books
 
         });
-    }catch (error) {
+    } catch (error) {
         console.log(error.message);
-        response.status(500).send({ message: error.message});
+        response.status(500).send({ message: error.message });
     }
 });
 //Route for Get All Books from database by id
-app.get('/books/:id', async (request, response) =>{
+app.get('/books/:id', async (request, response) => {
     try {
 
         const { id } = request.params;
@@ -64,12 +64,40 @@ app.get('/books/:id', async (request, response) =>{
         const book = await Book.findById(id);
 
         return response.status(200).json(book);
-    }catch (error) {
+    } catch (error) {
         console.log(error.message);
-        response.status(500).send({ message: error.message});
+        response.status(500).send({ message: error.message });
     }
 });
 
+// Route for Update a Book
+app.put('/books/:id', async (request, response) => {
+    try {
+        if (
+            !request.body.title ||
+            !request.body.author ||
+            !request.body.publishYear
+        ) {
+            return response.status(400).send({
+                message: 'Send all required fields: title, author, publishYear',
+            });
+        }
+
+        const { id } = request.params;
+
+        const result = await Book.findByIdAndUpdate(id, request.body);
+
+
+        if (!result) {
+            return response.status(404).json({ message: 'Book not found' });
+        }
+
+        return response.status(200).send({ message: 'Book updated successfully'});
+    } catch (error) {
+        console.log(error.message);
+        response.status(500).send({ message: error.message })
+    }
+})
 mongoose
     .connect(mongoDBURL)
     .then(() => {
